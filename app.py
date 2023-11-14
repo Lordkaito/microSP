@@ -31,7 +31,7 @@ except Exception as e:
 
 @app.route("/")
 def index():
-    return "Hello, World!"
+    return jsonify({"message": "Hello world"})
 
 
 @app.errorhandler(InvalidSignatureError)
@@ -47,6 +47,8 @@ def handle_auth_error(e):
 app.register_blueprint(auth_bp, url_prefix="/auth")
 
 app.register_blueprint(users_bp, url_prefix="/users")
+
+app.register_blueprint(posts_bp, url_prefix="/posts")
 
 if __name__ == "__main__":
     app.run(debug=True)

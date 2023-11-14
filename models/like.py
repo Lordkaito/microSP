@@ -12,3 +12,10 @@ class Likes(db.Model):
     def save(self):
         db.session.add(self)
         db.session.commit()
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "post_id": self.post_id,
+        }

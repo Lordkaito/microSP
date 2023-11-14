@@ -7,19 +7,28 @@ import jwt
 
 auth_bp = Blueprint("auth", __name__)
 
+@auth_bp.route("/", methods=["GET"])
+@jwt_required()
+def index():
+    id = get_jwt_identity()
+    print(id, "id for user")
+    return jsonify({"message": "Hello world"})
+
 
 @auth_bp.route("/login", methods=["POST"])
 def login():
-    username = request.json.get("username")
+    name = request.json.get("name")
     password = request.json.get("password")
 
-    user = Users.query.filter_by(username=username).first()
+    user = Users.query.filter_by(name=name).first()
     if user and check_password_hash(user.password, password):
-        access_token = create_access_token(identity=username, expires_delta=timedelta(days=30))
+        # we need to create the identity with the id of the user
+        # this is so we can easily find the user posts and more using the relation in the db
+        access_token = create_access_token(identity=user.id, expires_delta=timedelta(days=30))
         return jsonify(
             {
                 "message": "Logged in successfully",
-                "user": user.username,
+                "user": user.name,
                 "access_token": access_token,
             }
         )
@@ -30,7 +39,7 @@ def login():
 @auth_bp.route("/signup", methods=["POST"])
 def signup():
     print(request.json)
-    username = request.json.get("username")
+    name = request.json.get("name")
     password = request.json.get("password")
     email = request.json.get("email")
 
@@ -38,26 +47,26 @@ def signup():
     if user:
         return jsonify(
             {
-                "message": f"Users with email {email} already exists",
-                "user": user.username,
+                "message": f"User with email {email} already exists",
+                "user": user.name,
             }
         )
     else:
         hashed_password = generate_password_hash(password)
-        user = Users(username=username, password=hashed_password, email=email)
+        user = Users(name=name, password=hashed_password, email=email)
         user.save()
         return jsonify(
             {
                 "message": "Users created successfully",
-                "user": user.username,
+                "user": user.name,
             }
         )
 
 
-@auth_bp.route("/users", methods=["GET"])
-def users():
-    users = Users.query.all()
-    return jsonify({"users": "List of users"})
+# @auth_bp.route("/users", methods=["GET"])
+# def users():
+#     users = Users.query.all()
+#     return jsonify({"users": "List of users"})
 
 
 @auth_bp.route("/validate", methods=["POST"])
