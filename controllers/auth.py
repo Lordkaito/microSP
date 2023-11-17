@@ -48,7 +48,10 @@ def signup():
         return jsonify(
             {
                 "message": f"User with email {email} already exists",
-                "user": user.name,
+                "user": {
+                    "name": user.name,
+                    "email": user.email,
+                }
             }
         )
     else:
@@ -58,7 +61,12 @@ def signup():
         return jsonify(
             {
                 "message": "Users created successfully",
-                "user": user.name,
+                "user": {
+                    "name": user.name,
+                    "email": user.email,
+                    "id": user.id,
+                    "posts": [post.to_dict() for post in user.posts] if user.posts else [],
+                }
             }
         )
 
